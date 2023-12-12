@@ -5,12 +5,7 @@ from tensorflow import keras
 from keras.models import load_model
 import joblib
 
-def form_sentence(recognized_words):
-    sentence = ' '.join(recognized_words)
-    return sentence
-
 def process_frames(frames, model, label_encoder):
-    
     frames_array = np.array(frames)
     averaged_landmarks = np.mean(frames_array, axis=0)
 
@@ -23,8 +18,7 @@ def process_frames(frames, model, label_encoder):
 
     return predicted_word, confidence
 
-def test_model(model, label_encoder):
-    cap = cv2.VideoCapture(0)
+def test_model(cap, model, label_encoder):
     mp_holistic = mp.solutions.holistic
     mp_drawing = mp.solutions.drawing_utils
     
@@ -35,13 +29,14 @@ def test_model(model, label_encoder):
 
     recognized_words = []
     frames = []
-    predicted_word=""
-    confidence=1
+    predicted_word = ""
+    confidence = 1
+
     while True:
         ret, frame = cap.read()
         if not ret:
             break
-        
+
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = holistic.process(rgb_frame)
         pose = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_landmarks.landmark]).flatten() if results.pose_landmarks else np.zeros(132)
@@ -53,7 +48,6 @@ def test_model(model, label_encoder):
         frames.append(input_features)
 
         if len(frames) == 5:
-
             predicted_word, confidence = process_frames(frames, model, label_encoder)
             frames = [] 
 
@@ -69,19 +63,15 @@ def test_model(model, label_encoder):
         mp_drawing.draw_landmarks(rgb_frame, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS)
 
         rgb_frame = cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2BGR)
-        cv2.imshow("Hand Gesture Recognition", rgb_frame)
+        _, buffer = cv2.imencode('.jpg', rgb_frame)
+        frame = buffer.tobytes()
+
+        # Yield the frame to the browser
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
     cap.release()
     cv2.destroyAllWindows()
-
-    # sentence = form_sentence(recognized_words)
-    # print("Final Sentence:", sentence)
-
-
-model = load_model('hand_model.h5')
-label_encoder = joblib.load('label_encoder.joblib')
-
-test_model(model, label_encoder)
