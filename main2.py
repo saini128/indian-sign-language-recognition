@@ -128,5 +128,3 @@ label_encoder = joblib.load('label_encoder.joblib')
     
 test_model(model, label_encoder)
 
-
-root.mainloop()
