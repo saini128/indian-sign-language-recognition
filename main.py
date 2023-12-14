@@ -44,17 +44,21 @@ def test_model(cap, model, label_encoder):
         rh = np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(21*3)
 
         input_features = np.concatenate([pose, lh, rh])
+        
 
         frames.append(input_features)
 
         if len(frames) == 5:
-            predicted_word, confidence = process_frames(frames, model, label_encoder)
-            frames = [] 
+            if not np.all(lh == 0) and not np.all(rh == 0):
+                predicted_word, confidence = process_frames(frames, model, label_encoder)
+                frames = [] 
 
-            if confidence > 0.85:
-                recognized_words.append(predicted_word)
-                recognized_words = recognized_words[-3:]
-                confidence = int(confidence * 100)
+                if confidence > 0.85:
+                    recognized_words.append(predicted_word)
+                    recognized_words = recognized_words[-3:]
+                    confidence = int(confidence * 100)
+            else:
+                predicted_word=""
         
         cv2.putText(rgb_frame, f"{predicted_word}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 
