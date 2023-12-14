@@ -5,8 +5,28 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenCV Stream</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('connect', function() {
+            console.log('Connected to server');
+        });
+
+        socket.on('update_words', function(data) {
+            document.getElementById('words').innerText = data;
+        });
+
+        socket.on('disconnect', function() {
+            console.log('Disconnected from server');
+        });
+    </script>
 </head>
 <body>
-    <img src="http://localhost:5000/video_feed" width="640" height="480" />
+    <img src="http://localhost:3000/video_feed" width="640" height="480" />
+    <div>
+        <p>Recognized Words:</p>
+        <p id="words"></p>
+    </div>
 </body>
 </html>

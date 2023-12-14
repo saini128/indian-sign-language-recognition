@@ -31,7 +31,7 @@ def test_model(cap, model, label_encoder):
     frames = []
     predicted_word = ""
     confidence = 1
-
+    wordHistory=""
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -48,17 +48,19 @@ def test_model(cap, model, label_encoder):
 
         frames.append(input_features)
 
-        if len(frames) == 5:
-            if not np.all(lh == 0) and not np.all(rh == 0):
-                predicted_word, confidence = process_frames(frames, model, label_encoder)
-                frames = [] 
-
-                if confidence > 0.85:
-                    recognized_words.append(predicted_word)
-                    recognized_words = recognized_words[-3:]
-                    confidence = int(confidence * 100)
-            else:
-                predicted_word=""
+        if len(frames) == 90:
+            predicted_word, confidence = process_frames(frames, model, label_encoder)
+            frames = [] 
+            if not np.any(lh) and not np.any(rh):
+                predicted_word = ""
+            # predict.append(predicted_word)
+            # if all(pre==predict[0] for pre in predict): 
+            #     finalWord=predict[0]
+            wordHistory=wordHistory+" "+predicted_word
+            if confidence > 0.85:
+                recognized_words.append(predicted_word)
+                recognized_words = recognized_words[-3:]
+                confidence = int(confidence * 100)
         
         cv2.putText(rgb_frame, f"{predicted_word}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 
@@ -72,7 +74,7 @@ def test_model(cap, model, label_encoder):
 
         # Yield the frame to the browser
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+               b'Content-Type: image/jpeg\r\n\r\n' + rgb_frame + b'\r\n\r\n')
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
