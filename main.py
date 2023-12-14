@@ -72,7 +72,6 @@ def test_model(cap, model, label_encoder):
         _, buffer = cv2.imencode('.jpg', rgb_frame)
         frame = buffer.tobytes()
 
-        # Yield the frame to the browser
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + rgb_frame + b'\r\n\r\n')
 

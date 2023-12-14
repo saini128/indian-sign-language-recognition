@@ -33,7 +33,6 @@ def process_frames(frames, model, label_encoder):
 @socketio.on('connect')
 def handle_connect():
     print('Client connected')
-    # You can do additional setup here if needed
 
 
 @socketio.on('disconnect')
@@ -79,7 +78,7 @@ def generate_frames(model, label_encoder):
             if predicted_word != previous_word:
                 words.append(predicted_word)
                 previous_word = predicted_word
-            socketio.emit('update_words', ' '.join(words))  # Send updated words to clients
+            socketio.emit('update_words', ' '.join(words))
 
         mp_drawing.draw_landmarks(rgb_frame, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
         mp_drawing.draw_landmarks(rgb_frame, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
