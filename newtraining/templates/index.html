@@ -23,10 +23,12 @@
             });
 
             document.getElementById('reset').addEventListener('click', function() {
+                // Send a GET request to the /reset endpoint
                 fetch('/reset', {
                     method: 'GET',
                 })
                 .then(response => {
+                    // Check if the request was successful
                     if (response.ok) {
                         console.log('Reset successful');
                     } else {

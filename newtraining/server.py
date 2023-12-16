@@ -1,7 +1,6 @@
 from flask import Flask, render_template, Response
 from flask_socketio import SocketIO
 import cv2
-import main
 from tensorflow import keras
 from keras.models import load_model
 import joblib
@@ -91,6 +90,7 @@ def generate_frames(model, label_encoder):
         rgb_frame = cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2BGR)
         _, buffer = cv2.imencode('.jpg', rgb_frame)
         frame = buffer.tobytes()
+        # yield frame
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
@@ -99,11 +99,11 @@ def generate_frames(model, label_encoder):
 def index():
     return render_template('index.html')
 
-
 @app.route('/reset')
 def reset():
     words.clear()
     return Response('Success')
+
 
 @app.route('/video_feed')
 def video_feed():
