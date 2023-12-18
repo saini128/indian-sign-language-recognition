@@ -15,8 +15,25 @@ CORS(app)
 model = load_model('hand_model.h5')
 label_encoder = joblib.load('label_encoder.joblib')
 words = []
-
-
+current_language='en'
+translations = {
+    'Nameste': {'en': 'Nameste', 'hi': 'नमस्ते', 'pa': 'ਸਤ ਸ੍ਰੀ ਅਕਾਲ'},
+    'Bye': {'en': 'Bye', 'hi': 'अलविदा', 'pa': 'ਅਲਵਿਦਾ'},
+    "Good": {'en': 'Good', 'hi': 'अच्छा', 'pa': 'ਚੰਗਾ'},
+    "Morning": {'en': 'Morning', 'hi': 'सुबह', 'pa': 'ਸਵੇਰ'},
+    "Afternoon": {'en': 'Afternoon', 'hi': 'दोपहर', 'pa': 'ਦੋਪਹਿਰ'},
+    "How are you?": {'en': 'How are you?', 'hi': 'आप कैसे हैं?', 'pa': 'ਤੁਸੀਂ ਕਿਵੇਂ ਹੋ?'},
+    "Do": {'en': 'Do', 'hi': 'करो', 'pa': 'ਕਰੋ'},
+    "Indian": {'en': 'Indian', 'hi': 'भारतीय', 'pa': 'ਭਾਰਤੀ'},
+    "Computer": {'en': 'Computer', 'hi': 'कंप्यूटर', 'pa': 'ਕੰਪਿਊਟਰ'},
+    "Thank You": {'en': 'Thank You', 'hi': 'धन्यवाद', 'pa': 'ਧੰਨਵਾਦ'},
+    "I": {'en': 'I', 'hi': 'मैं', 'pa': 'ਮੈਂ'},
+    "What": {'en': 'What', 'hi': 'क्या', 'pa': 'ਕੀ'},
+    "You": {'en': 'You', 'hi': 'तुम', 'pa': 'ਤੁਸੀਂ'},
+    "Worked Hard": {'en': 'Worked Hard', 'hi': 'मेहनत की', 'pa': 'ਮਿਹਨਤ ਕੀਤੀ'},
+    "Today": {'en': 'Today', 'hi': 'आज', 'pa': 'ਅੱਜ'},
+    "We": {'en': 'We', 'hi': 'हम', 'pa': 'ਅਸੀਂ'},
+}
 def process_frames(frames, model, label_encoder):
     frames_array = np.array(frames)
     averaged_landmarks = np.mean(frames_array, axis=0)
@@ -39,6 +56,14 @@ def handle_connect():
 def handle_disconnect():
     print('Client disconnected')
 
+@socketio.on('language_change')
+def handle_language_change(new_language):
+    global current_language
+    current_language = new_language
+
+def translate_words(words, language):
+    translated_words = [translations[word][language] if word in translations else '' for word in words]
+    return translated_words
 
 def generate_frames(model, label_encoder):
     words.clear()
@@ -50,10 +75,10 @@ def generate_frames(model, label_encoder):
         min_detection_confidence=0.5,
         min_tracking_confidence=0.5,
     )
-    socketio.emit('update_words', ' ')
     frames = []
     predicted_word = ""
     previous_word = ""
+    translated_words = [] 
 
     while True:
         ret, frame = cap.read()
@@ -77,9 +102,12 @@ def generate_frames(model, label_encoder):
                 predicted_word = ""
 
             if predicted_word != previous_word:
+                words.append(',')
                 words.append(predicted_word)
                 previous_word = predicted_word
-            socketio.emit('update_words', ' '.join(words))
+                
+        translated_words = translate_words(words,current_language)
+        socketio.emit('update_words', ' '.join(translated_words))
 
         mp_drawing.draw_landmarks(rgb_frame, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
         mp_drawing.draw_landmarks(rgb_frame, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS)

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text-to-Speech Example</title>
+</head>
+<body>
+
+<h1>Text-to-Speech Example</h1>
+
+<label for="text">Enter Text:</label>
+<input type="text" id="text" placeholder="Enter text">
+
+<label for="language">Select Language:</label>
+<select id="language">
+    <option value="en-US">English (US)</option>
+    <option value="hi-IN">Hindi</option>
+    <option value="pa-IN">Punjabi</option>
+</select>
+
+<button onclick="speakText()">Speak</button>
+
+<script>
+    function speakText() {
+        const textInput = document.getElementById('text').value;
+        const languageSelect = document.getElementById('language');
+        const selectedLanguage = languageSelect.options[languageSelect.selectedIndex].value;
+
+        const speech = new SpeechSynthesisUtterance();
+        speech.text = textInput;
+        speech.lang = selectedLanguage;
+
+        window.speechSynthesis.speak(speech);
+    }
+</script>
+
+</body>
+</html>
