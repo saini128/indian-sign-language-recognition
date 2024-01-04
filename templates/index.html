@@ -78,7 +78,6 @@
                 const speech = new SpeechSynthesisUtterance();
                 speech.text = text;
                 speech.lang = lang;
-
                 speech.onend = null;
                 window.speechSynthesis.speak(speech);
             }

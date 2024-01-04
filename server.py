@@ -96,7 +96,7 @@ def generate_frames(model, label_encoder):
         frames.append(input_features)
 
         if len(frames) == 10:
-            predicted_word = process_frames(frames, model, label_encoder)
+            predicted_word = process_frames(frames, model, label_encoder) #to explain
             frames = []
             if not np.any(lh) and not np.any(rh):
                 predicted_word = ""
@@ -106,7 +106,7 @@ def generate_frames(model, label_encoder):
                 words.append(predicted_word)
                 previous_word = predicted_word
                 
-        translated_words = translate_words(words,current_language)
+        translated_words = translate_words(words,current_language) # to explain
         socketio.emit('update_words', ' '.join(translated_words))
 
         mp_drawing.draw_landmarks(rgb_frame, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
